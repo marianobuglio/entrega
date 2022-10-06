@@ -36,7 +36,16 @@ class Producto {
             throw Error(error)
         }
     }
-
+    async obtenerProductos(){
+        try {
+           const producto =  await this.archivo.getAll()
+           console.log(producto)
+           return producto
+        } catch (error) {
+            console.log(error)
+            throw Error(error)
+        }
+    }
     async actualizarProducto(id,objeto){
         try {
             const respuesta = await this.archivo.updateById(id,objeto)
