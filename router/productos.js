@@ -1,15 +1,23 @@
-const express = require('express')
+import express from 'express'
 const router = express.Router()
-const Producto = require('../models/producto')
-const MiddleWare = require('../middlewares/middlewares.js')
-let producto = new Producto()
+import MiddleWare from '../middlewares/middlewares.js'
+import daos from '../daos/index.js'
 
+// import Producto from '../daos/Productos/productoMongo'
+let producto 
+
+//inicia la config de dao
+(async ()=> {
+   const {productoDao} = await daos()
+    producto = productoDao
+    console.log(producto)
+})()
 router.get("/:id?",async (req,res)=>{
     // lista uno o todos los productos
     try {
         
         if(req.params.id){
-            const respuesta = await producto.obtenerProducto(parseInt(req.params.id))
+            const respuesta = await producto.obtenerProducto(req.params.id)
             res.send(respuesta)
         }else{
             const respuesta = await producto.obtenerProductos()
@@ -24,14 +32,9 @@ router.get("/:id?",async (req,res)=>{
 router.post("",MiddleWare.isAdmin,async (req,res)=>{
     // crea productos en listado
     try {
-    const nombre = req.body.nombre
-    const descripcion = req.body.descripcion
-    const codigo = req.body.codigo
-    const foto = req.body.foto
-    const precio = req.body.precio
-    const stock = req.body.stock
+ 
     
-    const id = await producto.nuevoProducto(nombre,descripcion,codigo,foto,precio,stock)
+    const id = await producto.nuevoProducto(req.body)
     res.send({id})
     } catch (error) {
         console.log(error)
@@ -44,7 +47,7 @@ router.put("/:id",MiddleWare.isAdmin,async (req,res)=>{
     // actualiza productos en listado
     try {
         
-        const respuesta = await producto.actualizarProducto(parseInt(req.params.id),req.body)
+        const respuesta = await producto.actualizarProducto(req.params.id,req.body)
         res.send(respuesta)
     } catch (error) {
         console.log(error)
@@ -57,11 +60,11 @@ router.delete("/:id",MiddleWare.isAdmin,async (req,res)=>{
     // elimina productos en listado
     try {
         
-        const respuesta = await producto.eliminarProducto(parseInt(req.params.id))
+        const respuesta = await producto.eliminarProducto(req.params.id)
         res.send(respuesta)
     } catch (error) {
         console.log(error)
         res.status(500).send({error:"Ocurrio un error"})
     }
 })
-module.exports = router
+export default router
